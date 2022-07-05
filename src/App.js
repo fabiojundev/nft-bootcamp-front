@@ -8,6 +8,7 @@ const TWITTER_HANDLE = "Web3dev_";
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 const OPENSEA_LINK = "";
 const TOTAL_MINT_COUNT = 50;
+const CONTRACT_ADDRESS = "0x733F2df5490bB99fED46269563C1944E0e94e610";
 
 const App = () => {
   const [currentAccount, setCurrentAccount] = useState("");
@@ -24,6 +25,8 @@ const App = () => {
       const account = accounts[0];
       console.log("Found an authorized account:", account);
       setCurrentAccount(account);
+
+      setupEventListener();
     } else {
       console.log("No authorized account found");
     }
@@ -49,13 +52,45 @@ const App = () => {
        */
       console.log("Conectado", accounts[0]);
       setCurrentAccount(accounts[0]);
+
+      setupEventListener();
     } catch (error) {
       console.log(error);
     }
   };
 
+  // Setup do listener.
+  const setupEventListener = async () => {
+    // é bem parecido com a função
+    try {
+      const { ethereum } = window
+
+      if (ethereum) {
+        // mesma coisa de novo
+        const provider = new ethers.providers.Web3Provider(ethereum)
+        const signer = provider.getSigner()
+        const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNft.abi, signer)
+
+        // Aqui está o tempero mágico.
+        // Isso essencialmente captura nosso evento quando o contrato lança
+        // Se você está familiar com webhooks, é bem parecido!
+        connectedContract.on("NewEpicNFTMinted", (from, tokenId) => {
+          console.log(from, tokenId.toNumber())
+          alert(
+            `Olá pessoal! Já cunhamos seu NFT. Pode ser que esteja branco agora. Demora no máximo 10 minutos para aparecer no OpenSea. Aqui está o link: <https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}>`
+          )
+        })
+
+        console.log("Setup event listener!")
+      } else {
+        console.log("Objeto ethereum não existe!")
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
   const askContractToMintNft = async () => {
-    const CONTRACT_ADDRESS = "0xF272a58316Da89195019508f47e9ADE53698C91a";
     try {
       const { ethereum } = window;
       if (ethereum) {
