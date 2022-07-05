@@ -1,44 +1,84 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./styles/App.css";
 import twitterLogo from "./assets/twitter-logo.svg";
-// Constants
 const TWITTER_HANDLE = "Web3dev_";
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 const OPENSEA_LINK = "";
 const TOTAL_MINT_COUNT = 50;
+
 const App = () => {
-  const checkIfWalletIsConnected = () => {
-    /*
-     * Primeiro tenha certeza que temos acesso a window.ethereum
-     */
+  const [currentAccount, setCurrentAccount] = useState("");
+  const checkIfWalletIsConnected = async () => {
     const { ethereum } = window;
     if (!ethereum) {
-      console.log("Certifique-se que você tem metamask instalado!");
+      console.log("Certifique-se que você tem metamask instalado!")
       return;
     } else {
-      console.log("Temos o objeto ethereum!", ethereum);
+      console.log("Temos o objeto ethereum!", ethereum)
+    }
+    const accounts = await ethereum.request({ method: "eth_accounts" });
+    if (accounts.length !== 0) {
+      const account = accounts[0];
+      console.log("Found an authorized account:", account);
+      setCurrentAccount(account);
+    } else {
+      console.log("No authorized account found");
     }
   };
+  /*
+   * Implemente seu método connectWallet aqui
+   */
+  const connectWallet = async () => {
+    try {
+      const { ethereum } = window;
+      if (!ethereum) {
+        alert("Baixe o Metamask!");
+        return;
+      }
+      /*
+       * Método chique para pedir acesso a conta.
+       */
+      const accounts = await ethereum.request({
+        method: "eth_requestAccounts",
+      });
+      /*
+       * Boom! Isso deve escrever o endereço público uma vez que autorizar o Metamask.
+       */
+      console.log("Conectado", accounts[0]);
+      setCurrentAccount(accounts[0]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   // Métodos para Renderizar
   const renderNotConnectedContainer = () => (
-    <button className="cta-button connect-wallet-button">
-      Connect to Wallet
+    <button onClick={connectWallet} className="cta-button connect-wallet-button">
+      Conectar Carteira
     </button>
-  );
-  /*
-   * Isso roda nossa função quando a página carrega.
-   */
+  )
+
   useEffect(() => {
     checkIfWalletIsConnected();
   }, []);
+  /*
+   * Adicionei um render condicional! Nós não queremos mostrar o Connect to Wallet se já estivermos conectados
+   */
   return (
     <div className="App">
       <div className="container">
         <div className="header-container">
           <p className="header gradient-text">Minha Coleção NFT</p>
-          <p className="sub-text">Exclusivos! Maravilhosos! Únicos! Descubra seu NFT hoje.</p>
-          {/* adicione o seu render method aqui */}
-          {renderNotConnectedContainer()}
+          <p className="sub-text">
+            Únicas. Lindas. Descubra a sua NFT hoje.
+          </p>
+          {currentAccount === "" ? (
+            renderNotConnectedContainer()
+          ) : (
+            <button onClick={null} className="cta-button connect-wallet-button">
+              Cunhar NFT
+            </button>
+          )}
         </div>
         <div className="footer-container">
           <img alt="Twitter Logo" className="twitter-logo" src={twitterLogo} />
