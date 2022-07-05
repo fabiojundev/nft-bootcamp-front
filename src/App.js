@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import "./styles/App.css";
 import twitterLogo from "./assets/twitter-logo.svg";
+import { ethers } from "ethers";
+import myEpicNft from "./utils/MyEpicNFT.json";
+
 const TWITTER_HANDLE = "Web3dev_";
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 const OPENSEA_LINK = "";
@@ -51,6 +54,33 @@ const App = () => {
     }
   };
 
+  const askContractToMintNft = async () => {
+    const CONTRACT_ADDRESS = "0x900d4a18D28b70Fa766116A0478e4f0902970E59";
+    try {
+      const { ethereum } = window;
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const connectedContract = new ethers.Contract(
+          CONTRACT_ADDRESS,
+          myEpicNft.abi,
+          signer
+        );
+        console.log("Vai abrir a carteira agora para pagar o gás...");
+        let nftTxn = await connectedContract.makeAnEpicNFT();
+        console.log("Cunhando...espere por favor.");
+        await nftTxn.wait();
+        console.log(
+          `Cunhado, veja a transação: https://rinkeby.etherscan.io/tx/${nftTxn.hash}`
+        );
+      } else {
+        console.log("Objeto ethereum não existe!");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   // Métodos para Renderizar
   const renderNotConnectedContainer = () => (
     <button onClick={connectWallet} className="cta-button connect-wallet-button">
@@ -72,13 +102,15 @@ const App = () => {
           <p className="sub-text">
             Únicas. Lindas. Descubra a sua NFT hoje.
           </p>
-          {currentAccount === "" ? (
-            renderNotConnectedContainer()
-          ) : (
-            <button onClick={null} className="cta-button connect-wallet-button">
-              Cunhar NFT
-            </button>
-          )}
+          {currentAccount === ""
+            ? renderNotConnectedContainer()
+            : (
+              /** Adiciona askContractToMintNFT Action para o evento onClick **/
+              <button onClick={askContractToMintNft} className="cta-button connect-wallet-button">
+                Cunhar NFT
+              </button>
+            )
+          }
         </div>
         <div className="footer-container">
           <img alt="Twitter Logo" className="twitter-logo" src={twitterLogo} />
