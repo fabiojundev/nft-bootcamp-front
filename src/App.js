@@ -1,25 +1,43 @@
-import "./styles/App.css"
-import twitterLogo from "./assets/twitter-logo.svg"
-import React from "react"
-
+import React, { useEffect } from "react";
+import "./styles/App.css";
+import twitterLogo from "./assets/twitter-logo.svg";
 // Constants
-const TWITTER_HANDLE = "web3dev_"
-const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`
-const OPENSEA_LINK = ""
-const TOTAL_MINT_COUNT = 50
-
+const TWITTER_HANDLE = "Web3dev_";
+const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
+const OPENSEA_LINK = "";
+const TOTAL_MINT_COUNT = 50;
 const App = () => {
-  // Render Methods
+  const checkIfWalletIsConnected = () => {
+    /*
+     * Primeiro tenha certeza que temos acesso a window.ethereum
+     */
+    const { ethereum } = window;
+    if (!ethereum) {
+      console.log("Certifique-se que você tem metamask instalado!");
+      return;
+    } else {
+      console.log("Temos o objeto ethereum!", ethereum);
+    }
+  };
+  // Métodos para Renderizar
   const renderNotConnectedContainer = () => (
-    <button className="cta-button connect-wallet-button">Conectar Carteira</button>
-  )
-
+    <button className="cta-button connect-wallet-button">
+      Connect to Wallet
+    </button>
+  );
+  /*
+   * Isso roda nossa função quando a página carrega.
+   */
+  useEffect(() => {
+    checkIfWalletIsConnected();
+  }, []);
   return (
     <div className="App">
       <div className="container">
         <div className="header-container">
-          <p className="header gradient-text">Minha Coleção de NFT</p>
+          <p className="header gradient-text">Minha Coleção NFT</p>
           <p className="sub-text">Exclusivos! Maravilhosos! Únicos! Descubra seu NFT hoje.</p>
+          {/* adicione o seu render method aqui */}
           {renderNotConnectedContainer()}
         </div>
         <div className="footer-container">
@@ -33,7 +51,6 @@ const App = () => {
         </div>
       </div>
     </div>
-  )
-}
-
-export default App
+  );
+};
+export default App;
