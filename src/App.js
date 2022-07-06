@@ -6,12 +6,14 @@ import myEpicNft from "./utils/MyEpicNFT.json";
 
 const TWITTER_HANDLE = "Web3dev_";
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
-const OPENSEA_LINK = "";
 const TOTAL_MINT_COUNT = 50;
-const CONTRACT_ADDRESS = "0x733F2df5490bB99fED46269563C1944E0e94e610";
+const CONTRACT_ADDRESS = "0x5626b4Aa99bc0A4429dcD1aA6E0bb34E103aF7F4";
+const OPENSEA_LINK = `https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}`;
 
 const App = () => {
   const [currentAccount, setCurrentAccount] = useState("");
+  const [totalNFTsMinted, setTotalNFTsMinted] = useState(0);
+
   const checkIfWalletIsConnected = async () => {
     const { ethereum } = window;
     if (!ethereum) {
@@ -31,6 +33,7 @@ const App = () => {
       console.log("No authorized account found");
     }
   };
+
   /*
    * Implemente seu método connectWallet aqui
    */
@@ -61,24 +64,24 @@ const App = () => {
 
   // Setup do listener.
   const setupEventListener = async () => {
-    // é bem parecido com a função
+
     try {
       const { ethereum } = window
 
       if (ethereum) {
-        // mesma coisa de novo
         const provider = new ethers.providers.Web3Provider(ethereum)
         const signer = provider.getSigner()
         const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNft.abi, signer)
 
-        // Aqui está o tempero mágico.
-        // Isso essencialmente captura nosso evento quando o contrato lança
-        // Se você está familiar com webhooks, é bem parecido!
+        getTotalNFTsMintedSoFar();
+
         connectedContract.on("NewEpicNFTMinted", (from, tokenId) => {
-          console.log(from, tokenId.toNumber())
-          alert(
-            `Olá pessoal! Já cunhamos seu NFT. Pode ser que esteja branco agora. Demora no máximo 10 minutos para aparecer no OpenSea. Aqui está o link: <https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}/${tokenId.toNumber()}>`
-          )
+          console.log(from, tokenId.toNumber());
+          setTotalNFTsMinted(tokenId.toNumber() + 1);
+
+          const msg = `Olá pessoal! Já cunhamos seu NFT. Pode ser que esteja branco agora. Demora no máximo 10 minutos para aparecer no OpenSea. Aqui está o link: ${OPENSEA_LINK}/${tokenId.toNumber()}`;
+          console.log(msg);
+          alert(msg);
         })
 
         console.log("Setup event listener!")
@@ -121,14 +124,31 @@ const App = () => {
     <button onClick={connectWallet} className="cta-button connect-wallet-button">
       Conectar Carteira
     </button>
-  )
+  );
+
+  const getTotalNFTsMintedSoFar = async () => {
+    try {
+      const { ethereum } = window
+
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum)
+        const signer = provider.getSigner()
+        const connectedContract = new ethers.Contract(CONTRACT_ADDRESS, myEpicNft.abi, signer)
+
+        const totalNFTsMinted = await connectedContract.getTotalNFTsMintedSoFar();
+        setTotalNFTsMinted(totalNFTsMinted.toNumber());
+      } else {
+        console.log("Objeto ethereum não existe!")
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   useEffect(() => {
     checkIfWalletIsConnected();
   }, []);
-  /*
-   * Adicionei um render condicional! Nós não queremos mostrar o Connect to Wallet se já estivermos conectados
-   */
+
   return (
     <div className="App">
       <div className="container">
@@ -137,13 +157,21 @@ const App = () => {
           <p className="sub-text">
             Únicas. Lindas. Descubra a sua NFT hoje.
           </p>
+          <p className="sub-text">
+            {totalNFTsMinted}/{TOTAL_MINT_COUNT} NFTs cunhadas até o momento.
+          </p>
           {currentAccount === ""
             ? renderNotConnectedContainer()
             : (
-              /** Adiciona askContractToMintNFT Action para o evento onClick **/
-              <button onClick={askContractToMintNft} className="cta-button connect-wallet-button">
-                Cunhar NFT
-              </button>
+              (totalNFTsMinted < TOTAL_MINT_COUNT)
+                ? <button onClick={askContractToMintNft} className="cta-button connect-wallet-button">
+                  Cunhar NFT
+                </button>
+                : <p className="sub-text">
+                  Quem cunhou, mintou, <br />
+                  Quem nao mintou, nao cunha mais!<br />
+                  NFTs esgotadas... <br />
+                </p>
             )
           }
         </div>
