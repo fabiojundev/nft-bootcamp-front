@@ -13,6 +13,7 @@ const OPENSEA_LINK = `https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}`;
 const App = () => {
   const [currentAccount, setCurrentAccount] = useState("");
   const [totalNFTsMinted, setTotalNFTsMinted] = useState(0);
+  const [minting, setMinting] = useState(false);
 
   const checkIfWalletIsConnected = async () => {
     const { ethereum } = window;
@@ -122,10 +123,12 @@ const App = () => {
         console.log("Vai abrir a carteira agora para pagar o gás...");
         let nftTxn = await connectedContract.makeAnEpicNFT();
         console.log("Cunhando...espere por favor.");
+        setMinting(true);
         await nftTxn.wait();
         console.log(
           `Cunhado, veja a transação: https://rinkeby.etherscan.io/tx/${nftTxn.hash}`
         );
+        setMinting(false);
       } else {
         console.log("Objeto ethereum não existe!");
       }
@@ -179,8 +182,16 @@ const App = () => {
             ? renderNotConnectedContainer()
             : (
               (totalNFTsMinted < TOTAL_MINT_COUNT)
-                ? <button onClick={askContractToMintNft} className="cta-button connect-wallet-button">
-                  Cunhar NFT
+                ? <button 
+                    onClick={askContractToMintNft} 
+                    className="cta-button connect-wallet-button"
+                    disabled={minting}
+                  >
+                  { 
+                    minting
+                      ? "Cunhando..."
+                      : "Cunhar NFT"
+                  } 
                 </button>
                 : <p className="sub-text">
                   Quem cunhou, mintou, <br />
