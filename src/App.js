@@ -8,7 +8,8 @@ const TWITTER_HANDLE = "Web3dev_";
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 const TOTAL_MINT_COUNT = 50;
 const CONTRACT_ADDRESS = "0x5626b4Aa99bc0A4429dcD1aA6E0bb34E103aF7F4";
-const OPENSEA_LINK = `https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}`;
+const OPENSEA_CONTRACT = `https://testnets.opensea.io/assets/${CONTRACT_ADDRESS}`;
+const OPENSEA_LINK = 'https://testnets.opensea.io/collection/chavesnft-xrrxpgtthh';
 
 const App = () => {
   const [currentAccount, setCurrentAccount] = useState("");
@@ -95,7 +96,7 @@ const App = () => {
           console.log(from, tokenId.toNumber());
           setTotalNFTsMinted(tokenId.toNumber() + 1);
 
-          const msg = `Olá pessoal! Já cunhamos seu NFT. Pode ser que esteja branco agora. Demora no máximo 10 minutos para aparecer no OpenSea. Aqui está o link: ${OPENSEA_LINK}/${tokenId.toNumber()}`;
+          const msg = `Olá pessoal! Já cunhamos seu NFT. Pode ser que esteja branco agora. Demora no máximo 10 minutos para aparecer no OpenSea. Aqui está o link: ${OPENSEA_CONTRACT}/${tokenId.toNumber()}`;
           console.log(msg);
           alert(msg);
         })
@@ -178,20 +179,28 @@ const App = () => {
           <p className="sub-text">
             {totalNFTsMinted}/{TOTAL_MINT_COUNT} NFTs cunhadas até o momento.
           </p>
+          <p className="sub-text">
+            <a
+              className="opensea-button"
+              href={OPENSEA_LINK}
+            >
+              🌊 Exibir coleção no OpenSea
+            </a>
+          </p>
           {currentAccount === ""
             ? renderNotConnectedContainer()
             : (
               (totalNFTsMinted < TOTAL_MINT_COUNT)
-                ? <button 
-                    onClick={askContractToMintNft} 
-                    className="cta-button connect-wallet-button"
-                    disabled={minting}
-                  >
-                  { 
+                ? <button
+                  onClick={askContractToMintNft}
+                  className="cta-button connect-wallet-button"
+                  disabled={minting}
+                >
+                  {
                     minting
                       ? "Cunhando..."
                       : "Cunhar NFT"
-                  } 
+                  }
                 </button>
                 : <p className="sub-text">
                   Quem cunhou, mintou, <br />
