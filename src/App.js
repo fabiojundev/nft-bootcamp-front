@@ -26,17 +26,21 @@ const App = () => {
     if (accounts.length !== 0) {
       const account = accounts[0];
       console.log("Found an authorized account:", account);
-      setCurrentAccount(account);
 
-      setupEventListener();
+      try {
+        if (await verifyChainId(ethereum)) {
+          setCurrentAccount(account);
+          setupEventListener();
+        }
+
+      } catch (e) {
+        console.log(e);
+      }
     } else {
       console.log("No authorized account found");
     }
   };
 
-  /*
-   * Implemente seu método connectWallet aqui
-   */
   const connectWallet = async () => {
     try {
       const { ethereum } = window;
@@ -44,23 +48,34 @@ const App = () => {
         alert("Baixe o Metamask!");
         return;
       }
-      /*
-       * Método chique para pedir acesso a conta.
-       */
       const accounts = await ethereum.request({
         method: "eth_requestAccounts",
       });
-      /*
-       * Boom! Isso deve escrever o endereço público uma vez que autorizar o Metamask.
-       */
       console.log("Conectado", accounts[0]);
-      setCurrentAccount(accounts[0]);
 
-      setupEventListener();
+      if (await verifyChainId(ethereum)) {
+        setCurrentAccount(accounts[0]);
+        setupEventListener();
+      }
+
     } catch (error) {
       console.log(error);
     }
   };
+
+  const verifyChainId = async (ethereum) => {
+    let chainId = await ethereum.request({ method: 'eth_chainId' });
+    console.log("Conectado à rede " + chainId);
+    // String, hex code of the chainId of the Rinkebey test network
+    const rinkebyChainId = "0x4";
+    if (chainId !== rinkebyChainId) {
+      const msg = "Você não está conectado a rede Rinkeby de teste! Desconecte através da sua carteira.";
+      alert(msg);
+      console.log(msg);
+      return false;
+    }
+    return true;
+  }
 
   // Setup do listener.
   const setupEventListener = async () => {
