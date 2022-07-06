@@ -176,9 +176,11 @@ const App = () => {
           <p className="sub-text">
             Únicas. Lindas. Descubra a sua NFT hoje.
           </p>
-          <p className="sub-text">
-            {totalNFTsMinted}/{TOTAL_MINT_COUNT} NFTs cunhadas até o momento.
-          </p>
+          {currentAccount &&
+            <p className="sub-text">
+              {totalNFTsMinted}/{TOTAL_MINT_COUNT} NFTs cunhadas até o momento.
+            </p>
+          }
           <p className="sub-text">
             <a
               className="opensea-button"
